@@ -9,7 +9,7 @@ shift
 # Command Line Tools ship Swift Testing but do not always put it on SwiftPM's search path.
 DEVELOPER_DIR_PATH="$(xcode-select -p)"
 FRAMEWORKS="$DEVELOPER_DIR_PATH/Library/Developer/Frameworks"
-FLAGS=()
+FLAGS=(-debug-info-format none)
 if [ "$COMMAND" = test ]; then
     FLAGS+=(--disable-xctest --enable-swift-testing)
     if [ -d "$FRAMEWORKS/Testing.framework" ]; then
@@ -20,4 +20,4 @@ fi
 exec swift "$COMMAND" --package-path "$ROOT" --disable-sandbox \
     --cache-path "$ROOT/.build/cache" --config-path "$ROOT/.build/config" \
     --security-path "$ROOT/.build/security" --scratch-path "$ROOT/.build" \
-    -debug-info-format none "${FLAGS[@]}" "$@"
+    "${FLAGS[@]}" "$@"
