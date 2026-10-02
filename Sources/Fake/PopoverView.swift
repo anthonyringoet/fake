@@ -2,96 +2,56 @@ import AppKit
 import FakeCore
 import SwiftUI
 
-private let fakeAccent = Color(red: 0.48, green: 0.39, blue: 0.88)
+private let actionBlue = Color(nsColor: .systemBlue)
 
 struct PopoverView: View {
     @ObservedObject var model: GeneratorModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: 28) {
             header
-            VStack(spacing: 12) {
-                registryCard
-                ibanCard
-            }
-            HStack {
-                Toggle("Copy with formatting", isOn: $model.copyWithFormatting)
-                    .toggleStyle(.checkbox)
-                    .font(.system(size: 12))
-                    .help("Off: plain digits / compact IBAN. On: dots, dashes and spaces as displayed.")
-                Spacer()
-                Button("New both", systemImage: "arrow.clockwise") { model.generateBoth() }
-                    .font(.system(size: 12, weight: .medium))
-                    .buttonStyle(.plain)
-                    .keyboardShortcut("r", modifiers: .command)
-                    .help("Generate both values (⌘R)")
-            }
-            Divider()
-            footer
+            registrySection
+            ibanSection
+            preferences
         }
-        .padding(20)
-        .frame(width: 420)
+        .padding(24)
+        .frame(width: 384)
         .background(Color(nsColor: .windowBackgroundColor))
-        .tint(fakeAccent)
+        .tint(actionBlue)
     }
 
     private var header: some View {
-        HStack(spacing: 11) {
-            Image(systemName: "die.face.5.fill")
-                .font(.system(size: 26, weight: .medium))
-                .foregroundStyle(fakeAccent)
-                .frame(width: 44, height: 44)
-                .background(fakeAccent.opacity(0.11), in: RoundedRectangle(cornerRadius: 13))
-                .accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Fake").font(.system(size: 23, weight: .bold, design: .rounded))
-                Text("Fresh values. Ready to paste.")
-                    .font(.system(size: 12)).foregroundStyle(.secondary)
-            }
+        HStack {
+            Text("Fake")
+                .font(.system(size: 17, weight: .semibold))
             Spacer()
-            Text("BE")
-                .font(.system(size: 11, weight: .semibold, design: .monospaced))
+            Button("New both") { model.generateBoth() }
+                .buttonStyle(.plain)
+                .font(.system(size: 12))
                 .foregroundStyle(.secondary)
-                .padding(.horizontal, 9).padding(.vertical, 5)
-                .background(.quaternary, in: Capsule())
+                .keyboardShortcut("r", modifiers: .command)
+                .help("Generate both values (⌘R)")
         }
     }
 
-    private var registryCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            cardTitle("Rijksregisternummer", icon: "person.text.rectangle")
+    private var registrySection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionTitle("Rijksregisternummer")
             valueButton(model.registry.formatted, kind: .registry)
-            HStack(spacing: 12) {
-                Label(model.registry.birthDate.iso8601, systemImage: "calendar")
-                Label(model.registry.sex.rawValue, systemImage: "person")
-                Spacer(minLength: 0)
-            }
-            .font(.system(size: 12)).foregroundStyle(.secondary)
-            .accessibilityLabel("Born \(model.registry.birthDate.iso8601), encoded sex \(model.registry.sex.rawValue)")
+            Text("\(model.registry.birthDate.iso8601) · \(model.registry.sex.rawValue)")
+                .font(.system(size: 12))
+                .foregroundStyle(.secondary)
+                .accessibilityLabel("Born \(model.registry.birthDate.iso8601), encoded sex \(model.registry.sex.rawValue)")
             actions(for: .registry)
-            Divider()
-            Button {
-                model.showsOptions.toggle()
-            } label: {
-                HStack {
-                    Text("Customize date & sex")
-                    Spacer()
-                    Image(systemName: model.showsOptions ? "chevron.up" : "chevron.down")
-                }
-                .font(.system(size: 11, weight: .medium)).foregroundStyle(.secondary)
-                .contentShape(Rectangle())
+                .padding(.top, 2)
+            if model.showsOptions {
+                customOptions.padding(.top, 4)
             }
-            .buttonStyle(.plain)
-            .accessibilityValue(model.showsOptions ? "Expanded" : "Collapsed")
-            if model.showsOptions { customOptions }
         }
-        .padding(15)
-        .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(.primary.opacity(0.06)))
     }
 
     private var customOptions: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 12) {
             Picker("Encoded sex", selection: $model.sexChoice) {
                 ForEach(SexChoice.allCases, id: \.self) { Text($0.rawValue).tag($0) }
             }
@@ -110,89 +70,101 @@ struct PopoverView: View {
             }
         }
         .font(.system(size: 12))
+        .controlSize(.small)
     }
 
-    private var ibanCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            cardTitle("Bank IBAN", icon: "building.columns")
+    private var ibanSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionTitle("Belgian IBAN")
             valueButton(model.iban.formatted, kind: .iban)
-            Text("Belgium · domestic + IBAN checksums")
-                .font(.system(size: 12)).foregroundStyle(.secondary)
             actions(for: .iban)
+                .padding(.top, 2)
         }
-        .padding(15)
-        .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(.primary.opacity(0.06)))
     }
 
-    private func cardTitle(_ title: String, icon: String) -> some View {
-        HStack(spacing: 6) {
-            Label(title, systemImage: icon).font(.system(size: 12, weight: .semibold))
-            Spacer()
-            Image(systemName: "checkmark.seal.fill")
-                .foregroundStyle(.green).font(.system(size: 12))
-                .help("Valid format and checksums")
-                .accessibilityLabel("Valid format and checksums")
-        }
+    private func sectionTitle(_ title: String) -> some View {
+        Text(title)
+            .font(.system(size: 12, weight: .medium))
+            .foregroundStyle(.secondary)
     }
 
     private func valueButton(_ value: String, kind: ValueKind) -> some View {
         Button { model.copy(kind) } label: {
-            HStack(spacing: 8) {
+            HStack(spacing: 12) {
                 Text(value)
-                    .font(.system(size: 20, weight: .semibold, design: .monospaced))
-                    .tracking(-0.6)
+                    .font(.system(size: 22))
+                    .monospacedDigit()
                     .foregroundStyle(.primary)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.85)
                 Spacer(minLength: 0)
                 Image(systemName: model.copiedKind == kind ? "checkmark" : "doc.on.doc")
-                    .font(.system(size: 14))
-                    .foregroundStyle(model.copiedKind == kind ? .green : fakeAccent)
+                    .font(.system(size: 13))
+                    .foregroundStyle(model.copiedKind == kind ? actionBlue : Color.secondary)
             }
-            .padding(.vertical, 3)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help("Click to copy \(kind == .registry ? "rijksregisternummer" : "IBAN")")
+        .keyboardShortcut("c", modifiers: kind == .registry ? [.command] : [.command, .shift])
+        .help(model.copiedKind == kind ? "Copied" : "Click to copy (\(kind == .registry ? "⌘C" : "⇧⌘C"))")
         .accessibilityLabel("Copy \(kind == .registry ? "rijksregisternummer" : "IBAN"): \(value)")
+        .accessibilityValue(model.copiedKind == kind ? "Copied" : "")
     }
 
     private func actions(for kind: ValueKind) -> some View {
         HStack(spacing: 8) {
-            Button("New", systemImage: "arrow.clockwise") {
+            if kind == .registry {
+                Button {
+                    model.showsOptions.toggle()
+                } label: {
+                    HStack(spacing: 5) {
+                        Image(systemName: model.showsOptions ? "chevron.down" : "chevron.right")
+                            .font(.system(size: 9, weight: .semibold))
+                        Text("Date & sex")
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.secondary)
+                .accessibilityLabel("Customize date & sex")
+                .accessibilityValue(model.showsOptions ? "Expanded" : "Collapsed")
+            }
+            Spacer(minLength: 8)
+            Button("New") {
                 kind == .registry ? model.generateRegistry() : model.generateIBAN()
             }
+            .buttonStyle(.bordered)
+            .tint(.gray)
+            .foregroundStyle(.primary)
             .keyboardShortcut(kind == .registry ? "1" : "2", modifiers: .command)
             .help("Generate a new \(kind == .registry ? "rijksregisternummer (⌘1)" : "IBAN (⌘2)")")
-            Button(model.copiedKind == kind ? "Copied" : "Copy",
-                   systemImage: model.copiedKind == kind ? "checkmark" : "doc.on.doc") {
-                model.copy(kind)
-            }
-            .keyboardShortcut("c", modifiers: kind == .registry ? [.command] : [.command, .shift])
-            .help("Copy current value (\(kind == .registry ? "⌘C" : "⇧⌘C"))")
-            Spacer(minLength: 0)
             Button("New & copy") { model.generateAndCopy(kind) }
                 .buttonStyle(.borderedProminent)
                 .keyboardShortcut(kind == .registry ? "1" : "2", modifiers: [.command, .shift])
                 .help("Generate and copy (⇧⌘\(kind == .registry ? "1" : "2"))")
         }
-        .buttonStyle(.bordered)
         .controlSize(.small)
-        .font(.system(size: 11, weight: .medium))
+        .font(.system(size: 12))
     }
 
-    private var footer: some View {
-        HStack {
-            Label(model.clipboardError ? "Couldn’t copy. Try again." : "Generated locally for testing",
-                  systemImage: model.clipboardError ? "exclamationmark.circle" : "sparkles")
-                .font(.system(size: 10)).foregroundStyle(.secondary)
-                .help("Synthetic values with valid checksums. They may coincide with assigned numbers.")
-            Spacer()
-            Button("Quit") { NSApp.terminate(nil) }
-                .buttonStyle(.plain)
-                .font(.system(size: 11)).foregroundStyle(.secondary)
-                .keyboardShortcut("q", modifiers: .command)
+    private var preferences: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Toggle("Copy with formatting", isOn: $model.copyWithFormatting)
+                    .toggleStyle(.checkbox)
+                    .font(.system(size: 12))
+                    .help("Off: compact values. On: punctuation and spaces as displayed.")
+                Spacer()
+                Button("Quit") { NSApp.terminate(nil) }
+                    .buttonStyle(.plain)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                    .keyboardShortcut("q", modifiers: .command)
+            }
+            if model.clipboardError {
+                Text("Couldn’t copy. Try again.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 }

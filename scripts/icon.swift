@@ -15,14 +15,13 @@ for size in [16, 32, 128, 256, 512] {
         (transform as NSAffineTransform).concat()
         let tile = NSBezierPath(roundedRect: NSRect(x: 62, y: 62, width: 900, height: 900),
                                 xRadius: 210, yRadius: 210)
-        let gradient = NSGradient(starting: NSColor(srgbRed: 0.60, green: 0.48, blue: 0.98, alpha: 1),
-                                  ending: NSColor(srgbRed: 0.36, green: 0.28, blue: 0.72, alpha: 1))!
-        gradient.draw(in: tile, angle: -90)
+        NSColor.systemBlue.setFill()
+        tile.fill()
         let die = NSBezierPath(roundedRect: NSRect(x: 248, y: 248, width: 528, height: 528),
                                xRadius: 110, yRadius: 110)
         NSColor.white.setFill()
         die.fill()
-        NSColor(srgbRed: 0.47, green: 0.37, blue: 0.84, alpha: 1).setFill()
+        NSColor.systemBlue.setFill()
         for (x, y) in [(376, 376), (648, 376), (512, 512), (376, 648), (648, 648)] {
             NSBezierPath(ovalIn: NSRect(x: x - 42, y: y - 42, width: 84, height: 84)).fill()
         }

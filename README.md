@@ -21,9 +21,9 @@ Requires macOS 14+ and Swift 6+ (Xcode or Command Line Tools). No dependencies.
 make smoke             # Run the native app and integration checks, then quit
 ```
 
-The standalone app is built at `build/Fake.app`. Drag it into Applications if desired. It has no Dock icon; click the dice and “Fake” in the menu bar. The local build is ad-hoc signed, without requiring an Apple developer account. It is not notarized for public distribution.
+The standalone app is built at `build/Fake.app`. Drag it into Applications if desired. It has no Dock icon; click “fake” in the menu bar. The local build is ad-hoc signed, without requiring an Apple developer account. It is not notarized for public distribution.
 
-Click either value to copy it. Each card also has **New**, **Copy**, and **New & copy** buttons. Expand **Customize date & sex** for a fixed birthday or encoded sex. Changes immediately generate a matching number. By default, copies are compact; **Copy with formatting** preserves the displayed punctuation and spacing, and is remembered between launches.
+Click either value to copy it. Each section has **New** and **New & copy** buttons. Expand **Date & sex** for a fixed birthday or encoded sex. Changes immediately generate a matching number. By default, copies are compact; **Copy with formatting** preserves the displayed punctuation and spacing, and is remembered between launches.
 
 Keyboard shortcuts while the popover is open:
 

@@ -34,12 +34,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "die.face.5", accessibilityDescription: "Fake")
-            button.image?.isTemplate = true
-            button.title = " Fake"
-            button.font = .systemFont(ofSize: 12, weight: .medium)
+            button.title = "fake"
+            button.font = .menuBarFont(ofSize: 0)
             button.toolTip = "Fake — Belgian test values"
-            button.setAccessibilityLabel("Fake")
+            button.setAccessibilityLabel("fake")
             button.target = self
             button.action = #selector(togglePopover)
         }
